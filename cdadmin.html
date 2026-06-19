@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareerVidya — Admin Panel</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --cv-red: #C0392B;
+  --cv-red-light: #FDECEA;
+  --cv-red-mid: #E74C3C;
+  --cv-orange: #E67E22;
+  --cv-orange-light: #FEF5EC;
+  --cv-dark: #1A1A2E;
+  --cv-dark2: #16213E;
+  --cv-text: #2C3E50;
+  --cv-text-muted: #7F8C8D;
+  --cv-border: #ECF0F1;
+  --cv-bg: #F8F9FA;
+  --cv-white: #FFFFFF;
+  --cv-green: #27AE60;
+  --cv-green-light: #EAFAF1;
+  --cv-blue: #2980B9;
+  --cv-blue-light: #EBF5FB;
+  --cv-amber: #F39C12;
+  --cv-amber-light: #FEF9E7;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--cv-bg); color: var(--cv-text); display: flex; height: 100vh; overflow: hidden; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 230px; min-width: 230px;
+  background: linear-gradient(180deg, #1A1A2E 0%, #16213E 100%);
+  display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+}
+.logo-area {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.logo-wrap { display: flex; align-items: center; gap: 10px; }
+.logo-icon {
+  width: 38px; height: 38px; border-radius: 8px;
+  background: linear-gradient(135deg, #C0392B, #E74C3C);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.logo-name { font-size: 16px; font-weight: 700; color: #fff; line-height: 1.1; }
+.logo-sub { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 1px; letter-spacing: .04em; }
+.admin-pill {
+  display: inline-block; margin-top: 12px;
+  background: rgba(192,57,43,0.25); border: 1px solid rgba(192,57,43,0.4);
+  color: #E74C3C; font-size: 10px; padding: 3px 10px; border-radius: 20px; letter-spacing:.04em;
+}
+.nav { flex: 1; padding: 12px 10px; overflow-y: auto; }
+.nav::-webkit-scrollbar { width: 3px; }
+.nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+.nav-sec { font-size: 10px; color: rgba(255,255,255,0.28); padding: 8px 8px 4px; letter-spacing: .08em; margin-top: 6px; }
+.ni {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: var(--radius-sm);
+  cursor: pointer; font-size: 13px; color: rgba(255,255,255,0.55);
+  transition: background .15s, color .15s; margin-bottom: 1px;
+}
+.ni:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+.ni.on { background: rgba(192,57,43,0.2); color: #fff; border-left: 2px solid #E74C3C; padding-left: 8px; }
+.ni i { font-size: 17px; }
+.ni .nb {
+  margin-left: auto; background: #C0392B; color: #fff;
+  font-size: 10px; padding: 1px 7px; border-radius: 10px;
+}
+.sidebar-footer {
+  padding: 12px 10px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.user-row { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--radius-sm); cursor: pointer; }
+.user-row:hover { background: rgba(255,255,255,0.05); }
+.uavatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, #C0392B, #E67E22);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 600; color: #fff;
+}
+.uname { font-size: 12px; color: rgba(255,255,255,0.75); font-weight: 500; }
+.urole { font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 1px; }
+
+/* MAIN */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar {
+  background: var(--cv-white); border-bottom: 1px solid var(--cv-border);
+  padding: 13px 24px; display: flex; align-items: center; justify-content: space-between;
+}
+.page-title { font-size: 16px; font-weight: 600; color: var(--cv-dark); }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.search-box {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--cv-bg); border: 1px solid var(--cv-border);
+  border-radius: 20px; padding: 6px 14px; font-size: 13px; color: var(--cv-text-muted);
+}
+.btn-primary {
+  background: linear-gradient(135deg, #C0392B, #E74C3C);
+  color: #fff; border: none; padding: 8px 16px;
+  border-radius: 20px; font-size: 13px; cursor: pointer;
+  display: flex; align-items: center; gap: 6px; font-weight: 500;
+}
+.btn-outline {
+  background: transparent; border: 1px solid var(--cv-border);
+  color: var(--cv-text-muted); padding: 7px 14px;
+  border-radius: 20px; font-size: 12px; cursor: pointer;
+}
+.notif-btn {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--cv-bg);
+  border: 1px solid var(--cv-border); display: flex; align-items: center;
+  justify-content: center; cursor: pointer; position: relative;
+}
+.notif-dot {
+  position: absolute; top: 8px; right: 8px;
+  width: 7px; height: 7px; border-radius: 50%; background: #E74C3C;
+  border: 1.5px solid #fff;
+}
+.content { flex: 1; overflow-y: auto; padding: 20px 24px; }
+.page { display: none; }
+.page.on { display: block; }
+
+/* STATS */
+.stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+.sc {
+  background: var(--cv-white); border: 1px solid var(--cv-border);
+  border-radius: var(--radius); padding: 16px 18px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.sc-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+.sc-label { font-size: 12px; color: var(--cv-text-muted); }
+.sc-val { font-size: 24px; font-weight: 700; color: var(--cv-dark); }
+.sc-ch { font-size: 11px; display: flex; align-items: center; gap: 3px; }
+.up { color: var(--cv-green); } .dn { color: var(--cv-red); } .nt { color: var(--cv-amber); }
+
+/* CARDS */
+.card {
+  background: var(--cv-white); border: 1px solid var(--cv-border);
+  border-radius: var(--radius); margin-bottom: 16px; overflow: hidden;
+}
+.card-header {
+  padding: 14px 18px; border-bottom: 1px solid var(--cv-border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-title { font-size: 14px; font-weight: 600; color: var(--cv-dark); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+/* TABLE */
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tbl th { padding: 10px 16px; text-align: left; font-size: 11px; color: var(--cv-text-muted); font-weight: 600; background: var(--cv-bg); border-bottom: 1px solid var(--cv-border); text-transform: uppercase; letter-spacing: .05em; }
+.tbl td { padding: 11px 16px; border-bottom: 1px solid var(--cv-border); color: var(--cv-text); }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: #FAFAFA; }
+
+/* BADGES */
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 500; }
+.ba { background: var(--cv-green-light); color: #1E8449; }
+.bi { background: var(--cv-red-light); color: #A93226; }
+.bw { background: var(--cv-amber-light); color: #B7770D; }
+.bb { background: var(--cv-blue-light); color: #1A5276; }
+.bg { background: #F3F4F6; color: #4B5563; }
+
+/* AVATAR */
+.avatar { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+
+/* ACTIONS */
+.act-btn { background: none; border: 1px solid var(--cv-border); padding: 4px 10px; border-radius: 20px; cursor: pointer; font-size: 11px; color: var(--cv-text-muted); }
+.act-btn:hover { background: var(--cv-bg); }
+.act-btn.danger { color: #A93226; border-color: #F5B7B1; }
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 16px; }
+.fg { display: flex; flex-direction: column; gap: 5px; }
+.fg.full { grid-column: 1/-1; }
+.fl { font-size: 12px; color: var(--cv-text-muted); font-weight: 500; }
+.fi { padding: 9px 12px; border: 1px solid var(--cv-border); border-radius: var(--radius-sm); font-size: 13px; background: var(--cv-bg); color: var(--cv-text); width: 100%; }
+.fi:focus { outline: none; border-color: #C0392B; }
+
+/* TOGGLE */
+.tog { width: 38px; height: 21px; border-radius: 11px; background: #27AE60; position: relative; cursor: pointer; transition: background .2s; flex-shrink: 0; }
+.tog::after { content:''; width: 17px; height: 17px; background: #fff; border-radius: 50%; position: absolute; top: 2px; right: 2px; transition: .2s; }
+.tog.off { background: #BDC3C7; }
+.tog.off::after { left: 2px; right: auto; }
+
+/* NOTIF */
+.notif-item { display: flex; align-items: flex-start; gap: 12px; padding: 13px 18px; border-bottom: 1px solid var(--cv-border); }
+.notif-item:last-child { border-bottom: none; }
+.ndot { width: 8px; height: 8px; border-radius: 50%; background: #E74C3C; flex-shrink: 0; margin-top: 5px; }
+.ndot.read { background: var(--cv-border); }
+.ntext { font-size: 13px; color: var(--cv-text); }
+.ntime { font-size: 11px; color: var(--cv-text-muted); margin-top: 3px; }
+
+/* SETTING ROW */
+.set-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 18px; border-bottom: 1px solid var(--cv-border); }
+.set-row:last-child { border-bottom: none; }
+.set-label { font-size: 13px; font-weight: 500; color: var(--cv-dark); }
+.set-sub { font-size: 11px; color: var(--cv-text-muted); margin-top: 2px; }
+
+/* MINI STAT */
+.mstat { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--cv-border); font-size: 13px; }
+.mstat:last-child { border-bottom: none; }
+.mstat-bar { height: 4px; border-radius: 2px; background: linear-gradient(90deg, #C0392B, #E74C3C); margin-top: 5px; }
+
+/* PROGRESS */
+.prog-row { margin-bottom: 12px; }
+.prog-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--cv-text-muted); margin-bottom: 5px; }
+.prog-bar { height: 6px; background: var(--cv-bg); border-radius: 3px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #C0392B, #E67E22); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo-area">
+    <div class="logo-wrap">
+      <div class="logo-icon">CV</div>
+      <div>
+        <div class="logo-name">CareerVidya</div>
+        <div class="logo-sub">Job Portal Platform</div>
+      </div>
+    </div>
+    <div class="admin-pill">ADMIN PANEL</div>
+  </div>
+
+  <div class="nav">
+    <div class="nav-sec">OVERVIEW</div>
+    <div class="ni on" onclick="show('dashboard',this)"><i class="ti ti-layout-dashboard"></i>Dashboard</div>
+    <div class="nav-sec">MANAGE</div>
+    <div class="ni" onclick="show('users',this)"><i class="ti ti-users"></i>Users <span class="nb">2.1k</span></div>
+    <div class="ni" onclick="show('employers',this)"><i class="ti ti-building"></i>Employers</div>
+    <div class="ni" onclick="show('jobs',this)"><i class="ti ti-briefcase"></i>Jobs <span class="nb">8</span></div>
+    <div class="ni" onclick="show('courses',this)"><i class="ti ti-book"></i>Courses</div>
+    <div class="nav-sec">REPORTS</div>
+    <div class="ni" onclick="show('analytics',this)"><i class="ti ti-chart-bar"></i>Analytics</div>
+    <div class="ni" onclick="show('payments',this)"><i class="ti ti-credit-card"></i>Payments</div>
+    <div class="nav-sec">SYSTEM</div>
+    <div class="ni" onclick="show('notifications',this)"><i class="ti ti-bell"></i>Notifications <span class="nb">5</span></div>
+    <div class="ni" onclick="show('settings',this)"><i class="ti ti-settings"></i>Settings</div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="uavatar">AD</div>
+      <div>
+        <div class="uname">Aarav Dixit</div>
+        <div class="urole">Super Admin</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="page-title" id="page-title">Dashboard</div>
+    <div class="topbar-right">
+      <div class="search-box"><i class="ti ti-search" style="font-size:15px"></i> Search anything...</div>
+      <div class="notif-btn"><i class="ti ti-bell" style="font-size:17px;color:#7F8C8D"></i><div class="notif-dot"></div></div>
+      <div style="font-size:12px;color:var(--cv-text-muted)">June 16, 2026</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page on" id="p-dashboard">
+      <div class="stats">
+        <div class="sc">
+          <div class="sc-icon" style="background:#FDECEA"><i class="ti ti-users" style="color:#C0392B;font-size:18px"></i></div>
+          <div class="sc-label">Total Users</div>
+          <div class="sc-val">21,480</div>
+          <div class="sc-ch up"><i class="ti ti-trending-up" style="font-size:13px"></i> +8% is mahine</div>
+        </div>
+        <div class="sc">
+          <div class="sc-icon" style="background:#EBF5FB"><i class="ti ti-building" style="color:#2980B9;font-size:18px"></i></div>
+          <div class="sc-label">Employers</div>
+          <div class="sc-val">1,240</div>
+          <div class="sc-ch up"><i class="ti ti-trending-up" style="font-size:13px"></i> +12 nayi</div>
+        </div>
+        <div class="sc">
+          <div class="sc-icon" style="background:#EAFAF1"><i class="ti ti-briefcase" style="color:#27AE60;font-size:18px"></i></div>
+          <div class="sc-label">Active Jobs</div>
+          <div class="sc-val">3,891</div>
+          <div class="sc-ch up"><i class="ti ti-trending-up" style="font-size:13px"></i> +5% is hafte</div>
+        </div>
+        <div class="sc">
+          <div class="sc-icon" style="background:#FEF9E7"><i class="ti ti-currency-rupee" style="color:#E67E22;font-size:18px"></i></div>
+          <div class="sc-label">Revenue (June)</div>
+          <div class="sc-val">₹4.2L</div>
+          <div class="sc-ch up"><i class="ti ti-trending-up" style="font-size:13px"></i> +18% YoY</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Weekly Traffic</div>
+            <select class="btn-outline" style="font-size:11px;padding:5px 10px;border-radius:20px">
+              <option>Is Hafte</option><option>Is Mahine</option><option>Is Saal</option>
+            </select>
+          </div>
+          <div style="padding:16px"><div style="position:relative;height:190px"><canvas id="trafficChart" role="img" aria-label="Weekly visitor traffic bar chart">Mon 1200 Tue 1800 Wed 1400 Thu 2200 Fri 1900 Sat 1100 Sun 900</canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Job Categories</div></div>
+          <div style="padding:14px 16px">
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;font-size:11px;color:var(--cv-text-muted)">
+              <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:#C0392B;display:inline-block"></span>Sales 34%</span>
+              <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:#2980B9;display:inline-block"></span>BPO 22%</span>
+              <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:#27AE60;display:inline-block"></span>Delivery 18%</span>
+              <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:2px;background:#E67E22;display:inline-block"></span>Other 26%</span>
+            </div>
+            <div style="position:relative;height:150px"><canvas id="categoryChart" role="img" aria-label="Pie chart of job categories">Sales 34%, BPO 22%, Delivery 18%, Other 26%</canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Recent Activity</div><button class="btn-outline">Sab Dekho</button></div>
+        <table class="tbl">
+          <thead><tr><th>Event</th><th>User / Company</th><th>City</th><th>Time</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>new employer register</td><td>TechServe Pvt Ltd</td><td>Noida</td><td>5 min ago</td><td><span class="badge bw">Pending Verify</span></td></tr>
+            <tr><td>Job posted</td><td>Rajesh Enterprises</td><td>Delhi</td><td>12 min ago</td><td><span class="badge bw">Review</span></td></tr>
+            <tr><td>Payment received</td><td>ABC Corp</td><td>Mumbai</td><td>28 min ago</td><td><span class="badge ba">Success</span></td></tr>
+            <tr><td>User complaint</td><td>Ravi Sharma</td><td>Delhi</td><td>1 hr ago</td><td><span class="badge bi">Pending</span></td></tr>
+            <tr><td>Job flagged</td><td>XYZ Solutions</td><td>Gurgaon</td><td>2 hr ago</td><td><span class="badge bi">Action Needed</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="page" id="p-users">
+      <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
+        <input class="fi" style="flex:1" placeholder="Search users by name, phone, city...">
+        <select class="fi" style="width:150px"><option>Sab Status</option><option>Active</option><option>Blocked</option><option>New</option></select>
+        <button class="btn-primary"><i class="ti ti-plus" style="font-size:15px"></i> User Add</button>
+      </div>
+      <div class="card">
+        <table class="tbl">
+          <thead><tr><th></th><th>Naam</th><th>Phone</th><th>City</th><th>Joined</th><th>Applications</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><div class="avatar" style="background:#EAFAF1;color:#1E8449">RK</div></td><td><b>Rajesh Kumar</b></td><td>98765 43210</td><td>Delhi</td><td>Jan 12, 2026</td><td>7</td><td><span class="badge ba">Active</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">Edit</button><button class="act-btn danger">Block</button></div></td></tr>
+            <tr><td><div class="avatar" style="background:#EBF5FB;color:#1A5276">PS</div></td><td><b>Priya Sharma</b></td><td>87654 32109</td><td>Noida</td><td>Feb 3, 2026</td><td>3</td><td><span class="badge ba">Active</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">Edit</button><button class="act-btn danger">Block</button></div></td></tr>
+            <tr><td><div class="avatar" style="background:#FEF9E7;color:#B7770D">AM</div></td><td><b>Arun Mehta</b></td><td>76543 21098</td><td>Gurgaon</td><td>Feb 19, 2026</td><td>1</td><td><span class="badge bw">Warning</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">Edit</button><button class="act-btn danger">Block</button></div></td></tr>
+            <tr><td><div class="avatar" style="background:#FDECEA;color:#A93226">VT</div></td><td><b>Vikas Thakur</b></td><td>65432 10987</td><td>Delhi</td><td>Mar 1, 2026</td><td>0</td><td><span class="badge bi">Blocked</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">Unblock</button><button class="act-btn danger">Delete</button></div></td></tr>
+            <tr><td><div class="avatar" style="background:#F3E8FF;color:#6B21A8">NR</div></td><td><b>Neha Rawat</b></td><td>54321 09876</td><td>Faridabad</td><td>Mar 15, 2026</td><td>5</td><td><span class="badge ba">Active</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">Edit</button><button class="act-btn danger">Block</button></div></td></tr>
+            <tr><td><div class="avatar" style="background:#EAFAF1;color:#1E8449">SP</div></td><td><b>Sunita Patel</b></td><td>43210 98765</td><td>Mumbai</td><td>Apr 2, 2026</td><td>2</td><td><span class="badge bb">New</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">Edit</button><button class="act-btn danger">Block</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- EMPLOYERS -->
+    <div class="page" id="p-employers">
+      <div style="display:flex;gap:10px;margin-bottom:16px">
+        <input class="fi" style="flex:1" placeholder="Company naam ya GST se search karo...">
+        <select class="fi" style="width:150px"><option>Sab Status</option><option>Verified</option><option>Pending</option><option>Suspended</option></select>
+      </div>
+      <div class="card">
+        <table class="tbl">
+          <thead><tr><th>Company</th><th>City</th><th>Jobs Posted</th><th>Plan</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><b>Apex Solutions</b></td><td>Delhi</td><td>8</td><td><span class="badge bb">Pro</span></td><td>Nov 2024</td><td><span class="badge ba">Verified</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">View</button><button class="act-btn danger">Suspend</button></div></td></tr>
+            <tr><td><b>TechServe Pvt Ltd</b></td><td>Noida</td><td>3</td><td><span class="badge bg">Free</span></td><td>Jun 2025</td><td><span class="badge bw">Pending</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">Verify</button><button class="act-btn danger">Reject</button></div></td></tr>
+            <tr><td><b>Rajesh Enterprises</b></td><td>Gurgaon</td><td>5</td><td><span class="badge bb">Pro</span></td><td>Dec 2024</td><td><span class="badge ba">Verified</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">View</button><button class="act-btn danger">Suspend</button></div></td></tr>
+            <tr><td><b>FastDeliver Co.</b></td><td>Delhi</td><td>12</td><td><span class="badge" style="background:#F3E8FF;color:#6B21A8">Enterprise</span></td><td>Sep 2024</td><td><span class="badge ba">Verified</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">View</button><button class="act-btn danger">Suspend</button></div></td></tr>
+            <tr><td><b>XYZ Solutions</b></td><td>Mumbai</td><td>2</td><td><span class="badge bg">Free</span></td><td>May 2025</td><td><span class="badge bi">Suspended</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">Restore</button><button class="act-btn danger">Delete</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- JOBS -->
+    <div class="page" id="p-jobs">
+      <div style="display:flex;gap:10px;margin-bottom:16px">
+        <input class="fi" style="flex:1" placeholder="Job title ya company se search karo...">
+        <select class="fi" style="width:140px"><option>Sab Status</option><option>Active</option><option>Review</option><option>Flagged</option><option>Closed</option></select>
+        <select class="fi" style="width:140px"><option>Sab Category</option><option>Sales</option><option>BPO</option><option>Delivery</option><option>Security</option></select>
+      </div>
+      <div class="card">
+        <table class="tbl">
+          <thead><tr><th>Job Title</th><th>Company</th><th>City</th><th>Salary</th><th>Applications</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><b>Sales Executive</b></td><td>Apex Solutions</td><td>Delhi</td><td>₹18–25k</td><td>34</td><td><span class="badge ba">Active</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">View</button><button class="act-btn danger">Remove</button></div></td></tr>
+            <tr><td><b>Customer Support</b></td><td>TechServe</td><td>Noida</td><td>₹15–20k</td><td>51</td><td><span class="badge ba">Active</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">View</button><button class="act-btn danger">Remove</button></div></td></tr>
+            <tr><td><b>Delivery Boy</b></td><td>FastDeliver Co.</td><td>Gurgaon</td><td>₹12–16k</td><td>28</td><td><span class="badge bw">Review</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">Approve</button><button class="act-btn danger">Reject</button></div></td></tr>
+            <tr><td><b>Field Technician</b></td><td>Rajesh Ent.</td><td>Delhi</td><td>₹20–28k</td><td>12</td><td><span class="badge bi">Flagged</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">Review</button><button class="act-btn danger">Remove</button></div></td></tr>
+            <tr><td><b>Security Guard</b></td><td>ABC Corp</td><td>Faridabad</td><td>₹10–14k</td><td>9</td><td><span class="badge ba">Active</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">View</button><button class="act-btn danger">Remove</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- COURSES -->
+    <div class="page" id="p-courses">
+      <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
+        <input class="fi" style="flex:1" placeholder="Course name ya category se search karo...">
+        <button class="btn-primary"><i class="ti ti-plus" style="font-size:15px"></i> new Course</button>
+      </div>
+      <div class="card">
+        <table class="tbl">
+          <thead><tr><th>Course Name</th><th>Category</th><th>Instructor</th><th>Students</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><b>Sales Mastery</b></td><td>Sales</td><td>Ramesh Gupta</td><td>1,204</td><td>₹999</td><td><span class="badge ba">Published</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">Edit</button><button class="act-btn danger">Unpublish</button></div></td></tr>
+            <tr><td><b>BPO Interview Prep</b></td><td>BPO</td><td>Sneha Jain</td><td>832</td><td>₹499</td><td><span class="badge ba">Published</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">Edit</button><button class="act-btn danger">Unpublish</button></div></td></tr>
+            <tr><td><b>Resume Writing Guide</b></td><td>Career Skills</td><td>Vikram Ahuja</td><td>2,110</td><td>Free</td><td><span class="badge ba">Published</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">Edit</button><button class="act-btn danger">Unpublish</button></div></td></tr>
+            <tr><td><b>Delivery Management</b></td><td>Logistics</td><td>Karan Mehta</td><td>0</td><td>₹799</td><td><span class="badge bw">Draft</span></td><td><div style="display:flex;gap:5px"><button class="act-btn">Publish</button><button class="act-btn danger">Delete</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div class="page" id="p-analytics">
+      <div class="stats">
+        <div class="sc">
+          <div class="sc-icon" style="background:#FDECEA"><i class="ti ti-user-plus" style="color:#C0392B;font-size:18px"></i></div>
+          <div class="sc-label">New Registrations</div>
+          <div class="sc-val">1,284</div>
+          <div class="sc-ch up"><i class="ti ti-trending-up" style="font-size:13px"></i> +14% MoM</div>
+        </div>
+        <div class="sc">
+          <div class="sc-icon" style="background:#EAFAF1"><i class="ti ti-file-text" style="color:#27AE60;font-size:18px"></i></div>
+          <div class="sc-label">Job Applications</div>
+          <div class="sc-val">8,921</div>
+          <div class="sc-ch up"><i class="ti ti-trending-up" style="font-size:13px"></i> +9%</div>
+        </div>
+        <div class="sc">
+          <div class="sc-icon" style="background:#EBF5FB"><i class="ti ti-check" style="color:#2980B9;font-size:18px"></i></div>
+          <div class="sc-label">Hirings</div>
+          <div class="sc-val">342</div>
+          <div class="sc-ch up"><i class="ti ti-trending-up" style="font-size:13px"></i> +22%</div>
+        </div>
+        <div class="sc">
+          <div class="sc-icon" style="background:#FEF9E7"><i class="ti ti-chart-pie" style="color:#E67E22;font-size:18px"></i></div>
+          <div class="sc-label">Bounce Rate</div>
+          <div class="sc-val">28%</div>
+          <div class="sc-ch dn"><i class="ti ti-trending-down" style="font-size:13px"></i> -3%</div>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Monthly Registrations</div></div>
+          <div style="padding:16px"><div style="position:relative;height:190px"><canvas id="regChart" role="img" aria-label="Monthly registrations line chart">Jan 800, Feb 950, Mar 1100, Apr 1000, May 1150, Jun 1284</canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Top Cities</div></div>
+          <div style="padding:16px">
+            <div class="prog-row"><div class="prog-label"><span>Delhi</span><span>4,821</span></div><div class="prog-bar"><div class="prog-fill" style="width:92%"></div></div></div>
+            <div class="prog-row"><div class="prog-label"><span>Mumbai</span><span>3,240</span></div><div class="prog-bar"><div class="prog-fill" style="width:68%"></div></div></div>
+            <div class="prog-row"><div class="prog-label"><span>Noida</span><span>2,108</span></div><div class="prog-bar"><div class="prog-fill" style="width:47%"></div></div></div>
+            <div class="prog-row"><div class="prog-label"><span>Gurgaon</span><span>1,890</span></div><div class="prog-bar"><div class="prog-fill" style="width:40%"></div></div></div>
+            <div class="prog-row"><div class="prog-label"><span>Bangalore</span><span>1,654</span></div><div class="prog-bar"><div class="prog-fill" style="width:34%"></div></div></div>
+            <div class="prog-row"><div class="prog-label"><span>Hyderabad</span><span>1,201</span></div><div class="prog-bar"><div class="prog-fill" style="width:25%"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYMENTS -->
+    <div class="page" id="p-payments">
+      <div class="stats">
+        <div class="sc">
+          <div class="sc-icon" style="background:#EAFAF1"><i class="ti ti-currency-rupee" style="color:#27AE60;font-size:18px"></i></div>
+          <div class="sc-label">Total Revenue</div>
+          <div class="sc-val">₹18.4L</div>
+          <div class="sc-ch up"><i class="ti ti-trending-up" style="font-size:13px"></i> +22% YoY</div>
+        </div>
+        <div class="sc">
+          <div class="sc-icon" style="background:#EBF5FB"><i class="ti ti-calendar" style="color:#2980B9;font-size:18px"></i></div>
+          <div class="sc-label">Is Mahine</div>
+          <div class="sc-val">₹4.2L</div>
+          <div class="sc-ch up"><i class="ti ti-trending-up" style="font-size:13px"></i> +18%</div>
+        </div>
+        <div class="sc">
+          <div class="sc-icon" style="background:#FEF9E7"><i class="ti ti-clock" style="color:#E67E22;font-size:18px"></i></div>
+          <div class="sc-label">Pending</div>
+          <div class="sc-val">₹38,400</div>
+          <div class="sc-ch nt">2 transactions</div>
+        </div>
+        <div class="sc">
+          <div class="sc-icon" style="background:#FDECEA"><i class="ti ti-arrow-back" style="color:#C0392B;font-size:18px"></i></div>
+          <div class="sc-label">Refunds</div>
+          <div class="sc-val">₹12,000</div>
+          <div class="sc-ch dn">3 cases</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Transaction History</div><button class="btn-outline">Export CSV</button></div>
+        <table class="tbl">
+          <thead><tr><th>Txn ID</th><th>Company</th><th>Plan</th><th>Amount</th><th>Date</th><th>Method</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--cv-text-muted)">#TXN8821</td><td>Apex Solutions</td><td>Pro</td><td>₹4,999</td><td>Jun 15, 2026</td><td>UPI</td><td><span class="badge ba">Paid</span></td></tr>
+            <tr><td style="color:var(--cv-text-muted)">#TXN8820</td><td>FastDeliver Co.</td><td>Enterprise</td><td>₹14,999</td><td>Jun 14, 2026</td><td>NEFT</td><td><span class="badge ba">Paid</span></td></tr>
+            <tr><td style="color:var(--cv-text-muted)">#TXN8819</td><td>TechServe Ltd</td><td>Pro</td><td>₹4,999</td><td>Jun 13, 2026</td><td>Card</td><td><span class="badge bw">Pending</span></td></tr>
+            <tr><td style="color:var(--cv-text-muted)">#TXN8818</td><td>XYZ Solutions</td><td>Free</td><td>₹0</td><td>Jun 12, 2026</td><td>—</td><td><span class="badge bg">Free</span></td></tr>
+            <tr><td style="color:var(--cv-text-muted)">#TXN8817</td><td>Rajesh Ent.</td><td>Pro</td><td>₹4,999</td><td>Jun 11, 2026</td><td>UPI</td><td><span class="badge bi">Refunded</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="page" id="p-notifications">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px"><button class="btn-outline">Sab Padhon</button></div>
+      <div class="card">
+        <div class="notif-item"><div class="ndot"></div><div><div class="ntext">TechServe Pvt Ltd ne register kiya — verification pending hai</div><div class="ntime">5 minute pehle</div></div></div>
+        <div class="notif-item"><div class="ndot"></div><div><div class="ntext">XYZ Solutions ki job "Field Engineer" flag ki gayi — suspicious content</div><div class="ntime">32 minute pehle</div></div></div>
+        <div class="notif-item"><div class="ndot"></div><div><div class="ntext">Payment #TXN8819 pending hai — TechServe Ltd ₹4,999</div><div class="ntime">1 ghante pehle</div></div></div>
+        <div class="notif-item"><div class="ndot read"></div><div><div class="ntext">Vikas Thakur ke account ki 3 complaints aayi — review karein</div><div class="ntime">Kal, 3:00 PM</div></div></div>
+        <div class="notif-item"><div class="ndot read"></div><div><div class="ntext">Monthly revenue report ready hai — June 2026</div><div class="ntime">2 din pehle</div></div></div>
+        <div class="notif-item"><div class="ndot read"></div><div><div class="ntext">System update v2.1 successfully deploy hua</div><div class="ntime">3 din pehle</div></div></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="p-settings">
+      <div class="two-col">
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header"><div class="card-title">General Settings</div></div>
+            <div class="set-row"><div><div class="set-label">Nai job auto-approve</div><div class="set-sub">Verified employers ke liye</div></div><div class="tog off" onclick="this.classList.toggle('off')"></div></div>
+            <div class="set-row"><div><div class="set-label">New user email notification</div><div class="set-sub">Admin ko alert bhejo</div></div><div class="tog" onclick="this.classList.toggle('off')"></div></div>
+            <div class="set-row"><div><div class="set-label">Maintenance mode</div><div class="set-sub">Site temporarily band karo</div></div><div class="tog off" onclick="this.classList.toggle('off')"></div></div>
+            <div class="set-row"><div><div class="set-label">Fraud detection</div><div class="set-sub">Auto flag suspicious jobs</div></div><div class="tog" onclick="this.classList.toggle('off')"></div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Plan Pricing</div></div>
+            <div class="form-grid">
+              <div class="fg"><label class="fl">Free Plan</label><input class="fi" value="₹0 / month"></div>
+              <div class="fg"><label class="fl">Pro Plan</label><input class="fi" value="₹4,999 / month"></div>
+              <div class="fg"><label class="fl">Enterprise</label><input class="fi" value="₹14,999 / month"></div>
+              <div class="fg"><label class="fl">Max Jobs (Free)</label><input class="fi" value="3"></div>
+            </div>
+            <div style="padding:0 16px 14px"><button class="btn-primary">Save Changes</button></div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header"><div class="card-title">Admin Profile</div></div>
+            <div class="form-grid" style="grid-template-columns:1fr">
+              <div class="fg"><label class="fl">Admin Naam</label><input class="fi" value="Aarav Dixit"></div>
+              <div class="fg"><label class="fl">Email</label><input class="fi" value="admin@careervidya.in"></div>
+              <div class="fg"><label class="fl">Phone</label><input class="fi" value="+91 99999 00000"></div>
+              <div class="fg"><label class="fl">new Password</label><input class="fi" type="password" placeholder="••••••••"></div>
+            </div>
+            <div style="padding:0 16px 14px"><button class="btn-primary">Update Karo</button></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Permissions</div></div>
+            <div class="set-row"><div><div class="set-label">Super Admin</div><div class="set-sub">Aarav Dixit</div></div><span class="badge ba">Active</span></div>
+            <div class="set-row"><div><div class="set-label">Moderator</div><div class="set-sub">Pooja Verma</div></div><span class="badge bb">Read Only</span></div>
+            <div class="set-row"><div><div class="set-label">Support Agent</div><div class="set-sub">Manish Rao</div></div><span class="badge bw">Limited</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function show(id, el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  el.classList.add('on');
+  const t={dashboard:'Dashboard',users:'Users',employers:'Employers',jobs:'Jobs Management',courses:'Courses',analytics:'Analytics',payments:'Payments',notifications:'Notifications',settings:'Settings'};
+  document.getElementById('page-title').textContent=t[id]||id;
+}
+
+new Chart(document.getElementById('trafficChart'),{type:'bar',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{label:'Visitors',data:[1200,1800,1400,2200,1900,1100,900],backgroundColor:'#C0392B',borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#7F8C8D',font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{color:'#7F8C8D',font:{size:11}}}}}});
+
+new Chart(document.getElementById('categoryChart'),{type:'doughnut',data:{labels:['Sales','BPO','Delivery','Other'],datasets:[{data:[34,22,18,26],backgroundColor:['#C0392B','#2980B9','#27AE60','#E67E22'],borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+
+new Chart(document.getElementById('regChart'),{type:'line',data:{labels:['Jan','Feb','Mar','Apr','May','Jun'],datasets:[{label:'Registrations',data:[800,950,1100,1000,1150,1284],borderColor:'#C0392B',backgroundColor:'rgba(192,57,43,0.07)',tension:0.4,fill:true,pointRadius:4,pointBackgroundColor:'#C0392B',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:'#7F8C8D',font:{size:11}}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{color:'#7F8C8D',font:{size:11}}}}}});
+</script>
+</body>
+</html>
